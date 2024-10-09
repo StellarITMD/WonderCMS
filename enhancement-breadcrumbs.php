@@ -1,47 +1,56 @@
 <?php
 /**
- * Hits counter plugin.
+ * Breadcrumb enhancement plugin.
  *
- * Simple hits/visits counter. Hits are displayed in the footer only to the admin.
- * Hits are not incremented if admin is logged in.
+ * Simply adds breadcrumbs to make search engines find the enhancement
  *
- * @author Yassine Addi <yassineaddi.dev@gmail.com>
- * Forked by Robert Isoski
- */
+ * @author William Small <webdev@willgetitdone.com>
+  */
 
 global $Wcms;
 
-if (defined('VERSION')) {
-    $Wcms->addListener('menu', 'incrementHits');
-    $Wcms->addListener('footer', 'displayHits');
+if ( ! $Wcms->loggedIn) {
+    if (defined('VERSION')) {
+        $Wcms->addListener('footer', 'displayEnhancements');
+    }
 }
 
-function incrementHits ($args) {
-    global $Wcms;
+function mad_breadcrumbs() {
+  $pageURL = 'http';
+  if ($_SERVER["HTTPS"] == "on") {$pageURL .= "s";}
+  $pageURL .= "://";
+  if ($_SERVER["SERVER_PORT"] != "80") {
+   $pageURL .= $_SERVER["SERVER_NAME"].":".$_SERVER["SERVER_PORT"].$_SERVER["REQUEST_URI"];
+  } else {
+   $pageURL .= $_SERVER["SERVER_NAME"].$_SERVER["REQUEST_URI"];
+  }
+  $page_URI = $_SERVER["SERVER_NAME"];
+  $url_parts = explode("/", parse_url($pageURL, PHP_URL_PATH));
+  $y = 0;
+  $url_string = "";
+  if (!is_home()) {
+      echo '<ul itemscope="" itemtype="http://schema.org/BreadcrumbList" class="breadcrumb">';
+      echo '<li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"><a href="https://' . $page_URI . '/" itemprop="item"><span class="" itemprop="name">Home</span><i class="fi fi-home"></i></a><meta itemprop="position" content="1" /></li>';
+      $x = 1;
 
-    if ($Wcms->loggedIn) {
-        return $args;
-    }
-    $hits = file_exists(__DIR__ . '/hits.txt') ? (int) file_get_contents(__DIR__ . '/hits.txt') : 0;
-    if ( ! isset($_SESSION['_wcms_hits_counter'])) {
-        $_SESSION['_wcms_hits_counter'] = time();
-        $hits++;
-    }
-    if ((time()-$_SESSION['_wcms_hits_counter'])>600) {
-        $hits++;
-    }
-    $_SESSION['_wcms_hits_counter'] = time();
-    file_put_contents(__DIR__ . '/hits.txt', $hits);
-    return $args;
+      foreach ($url_parts as $part){
+        if($part !== ""):
+          $url_string .= $part ."/";
+          if($part == "category"):
+            echo '<li  itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"><a href="#" itemprop="item"><span itemprop="name">'. ucwords(str_replace("-"," ", $part)) .'</span></a><meta itemprop="position" content="'. $x .'" /></li>';
+          else:
+            echo '<li  itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"><a href="https://' . $page_URI . '/' . $url_string. '" itemprop="item"><span itemprop="name">'. ucwords(str_replace("-"," ", $part)) .'</span></a><meta itemprop="position" content="'. $x .'" /></li>';
+          endif;
+        endif;
+        $x += 1;
+      }
+      echo '</ul>';
+  }
 }
 
-function displayHits ($args) {
+function displayEnhancements ($args) {
     global $Wcms;
-    
-    if ( ! $Wcms->loggedIn) {
-        return $args;
-    }
-    $hits = file_exists(__DIR__ . '/hits.txt') ? (int) file_get_contents(__DIR__ . '/hits.txt') : 0;
-    $args[0] .= ' &nbsp; Website visits: ' . $hits;
+
+    $args[0] .= 	mad_breadcrumbs(); /* create breadcrumbs using function */ 
     return $args;
 }
