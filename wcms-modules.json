@@ -1,0 +1,13 @@
+{
+    "version": 1,
+    "plugins": {
+        "hits-counter": {
+            "name": "Enhancement Breadcrumbs",
+            "repo": "https://github.com/StellarITMD/wcms-enhancement-breadcrumbs/tree/master",
+            "zip": "https://github.com/StellarITMD/wcms-enhancement-breadcrumbs/archive/master.zip",
+            "summary": "Adds breadcrumb enhancement for SEO",
+            "version": "1",
+            "image": "https://raw.githubusercontent.com/StellarITMD/wcms-enhancement-breadcrumbs/master/preview.jpg"
+        }
+    }
+}
